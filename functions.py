@@ -1,10 +1,13 @@
 ''' Shared library of functions for other Python files
 '''
 
+import io
 import os
 import re
+import base64
 import datetime
 import bugzilla
+import matplotlib.pyplot as plt
 from jira import JIRA
 
 
@@ -42,6 +45,27 @@ def generate_html_file(htmlcode, remind=False):
 	with open(filename, 'w') as file:
 		file.write(htmlcode)
 	return None
+
+
+def generate_pie_chart(success_size, unstable_size, failure_size, missing_size, error_size):
+	'''
+	'''
+	chart_IObytes = io.BytesIO()
+
+	labels = ['SUCCESS', 'UNSTABLE', 'FAILURE', 'NO_KNOWN_BUILDS', 'ERROR']
+	colors = ['blue', 'yellow', 'red', 'lightgray', 'darkgray']
+	sizes = [success_size, unstable_size, failure_size, missing_size, error_size]
+
+	plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+	plt.axis('equal')
+	plt.savefig('chart.png')
+	plt.savefig(chart_IObytes, format='png')
+
+	chart_IObytes.seek(0)
+	chart_hash = base64.b64encode(chart_IObytes.read())
+	#chart_hash = chart_hash.decode()
+
+	return chart_hash
 
 
 def get_bugs_dict(bug_ids, config):

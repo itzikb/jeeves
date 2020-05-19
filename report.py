@@ -1,11 +1,12 @@
 import jinja2
 from smtplib import SMTP
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
-from functions import generate_html_file, get_bugs_dict, \
-	get_bugs_set, get_jenkins_job_info, get_jenkins_jobs, \
-	get_jira_dict, get_jira_set, get_osp_version, \
-	get_other_blockers, percent
+from functions import generate_html_file, generate_pie_chart, \
+	get_bugs_dict, get_bugs_set, get_jenkins_job_info, \
+	get_jenkins_jobs, get_jira_dict, get_jira_set, \
+	get_osp_version, get_other_blockers, percent
 
 
 def run_report(config, blockers, server, header, test, save):
@@ -161,6 +162,9 @@ def run_report(config, blockers, server, header, test, save):
 	else:
 		summary['total_error'] = False
 
+	# generate chart
+	chart = generate_pie_chart(num_success, num_unstable, num_failure, num_missing, num_error)
+
 	# initialize jinja2 vars
 	loader = jinja2.FileSystemLoader('./report_template.html')
 	env = jinja2.Environment(loader=loader)
@@ -170,7 +174,8 @@ def run_report(config, blockers, server, header, test, save):
 	htmlcode = template.render(
 		header=header,
 		rows=rows,
-		summary=summary
+		summary=summary,
+		chart=chart
 	)
 
 	# parse list of email addresses
