@@ -21,6 +21,11 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		tempest_tests_failed = None
 		build_info = server.get_build_info(job_name, lcb_num)
 		build_actions = build_info['actions']
+		stage_failure = 'N/A'
+		if build_info['result'] == 'FAILURE':
+			build_stages = server.get_build_stages(job_name, lcb_num)
+			stage_failure = get_stage_failure(build_stages)
+		build_time = build_info.get('timestamp')
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
 				build_parameters = action['parameters']
@@ -71,6 +76,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 			build_days_ago = "N/A"
 			lcb_result = "NO_KNOWN_BUILDS"
 			tempest_tests_failed = None
+			stage_failure = "N/A"
 
 		# Unknown error, skip job
 		else:
@@ -85,7 +91,9 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		'second_compose': second_compose,
 		'lcb_result': lcb_result,
 		'build_days_ago': build_days_ago,
-		'tempest_tests_failed': tempest_tests_failed
+		'tempest_tests_failed': tempest_tests_failed,
+		'stage_failure': stage_failure
+
 	}
 	return jenkins_api_info
 
@@ -132,3 +140,9 @@ def get_osp_version(job_name):
 	if version is None:
 		return None
 	return version.group()
+
+def get_stage_failure(build_stages):
+	for stage in build_stages['stages']:
+		if stage['status'] == 'FAILED':
+			return stage['name']
+	return None

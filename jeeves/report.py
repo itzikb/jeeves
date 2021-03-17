@@ -148,7 +148,8 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 				'tickets': tickets,
 				'other': other,
 				'tempest_tests_failed': jenkins_api_info['tempest_tests_failed'],
-				'tempest_tests_url': jenkins_api_info['job_url'] + str(jenkins_api_info['lcb_num']) + '/testReport'
+				'tempest_tests_url': jenkins_api_info['job_url'] + str(jenkins_api_info['lcb_num']) + '/testReport',
+				'stage_failure': jenkins_api_info['stage_failure']
 			}
 
 			# append row to rows
